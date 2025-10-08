@@ -1,45 +1,41 @@
 package main
 
-import(
+import (
 	"fmt"
-	"movies/movie"
-	"movies/character"
+	"movies/db"
+	"movies/db/character_repository"
+	"movies/db/movie_repository"
 )
 
 func main() {
-	m1 := AddMovie(1994, "Skazani na Shawshank")
-	m2 := AddMovie(1999, "Matrix")
-	m3 := AddMovie(1999, "Zielona mila")
+	db := db.New()
+	mr := movie_repository.New(db)
+	cr := character_repository.New(db)
 
-	c1 := AddCharacter("Morgan Freeman", m1)
-	c2 := AddCharacter("Keanu Reeves", m2)
+	m1 := mr.Create("Skazani na Shawshank", 1994)
+	m2 := mr.Create("Matrix", 1999)
+	m3 := mr.Create("Zielona mila", 1999)
 
-	fmt.Println("Movies:", movie.Movies)
-	fmt.Println("Characters:", character.Characters)
+	fmt.Println(m1)
 
-	fmt.Println(movie.Get(m1.Id))
-	fmt.Println(movie.Get(m2.Id))
+	c1 := cr.Create("Andy", m1,)
+	c2 := cr.Create("Morfeus", m2)
+	c3 := cr.Create("Neo", m2)
 
-	fmt.Println(character.Get(c1.Id))
-	fmt.Println(character.Get(c2.Id))
+	fmt.Println("Movies:", db.Movies)
+	fmt.Println("Characters:", db.Characters)
 
-	movie.Movies[1].Update(movie.Config{Year: 1997, Title: "Kiler"})
+	fmt.Println(mr.Get(m1.Id))
 
-	character.Characters[0].Update(character.Config{Name: "Tom Hanks", Movie: m3})
+	fmt.Println(cr.Get(c1.Id))
 
-	character.Delete(c2.Id)
-	fmt.Println("Characters:", character.Characters)
+	mr.Update(m3.Id, "Kiler", 1997)
+	cr.Update(c1.Id, "Andy Dufresne", m1)
 
-	movie.Delete(m1.Id)
-	fmt.Println("Movies:", movie.Movies)
-}
+	cr.Delete(c2.Id)
+	cr.Delete(c3.Id)
 
-func AddMovie(year int, title string) movie.Movie {
-	cfg := movie.Config{Year: year, Title: title}
-	return movie.New(cfg)
-}
-
-func AddCharacter(name string, movie movie.Movie) character.Character {
-	cfg := character.Config{Name: name, Movie: movie}
-	return character.New(cfg)
+	mr.Delete(m2.Id)
+	fmt.Println("Movies:", db.Movies)
+	fmt.Println("Characters:", db.Characters)
 }
