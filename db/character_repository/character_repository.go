@@ -40,6 +40,16 @@ func (mr *CharacterRepository) Get(id uuid.UUID) character.Character {
 	return character
 }
 
+func (mr *CharacterRepository) GetAll() []character.Character {
+	var characters []character.Character
+
+	for _, character := range mr.DB.Characters {
+		characters = append(characters, character)
+	}
+
+	return characters
+}
+
 func (mr *CharacterRepository) Update(id uuid.UUID, name string, movie movie.Movie) (character.Character, error) {
 	character, exists :=  mr.DB.Characters[id]
 	
