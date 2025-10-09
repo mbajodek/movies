@@ -29,14 +29,24 @@ func (mr *MovieRepository) Create(title string, year int) movie.Movie {
 
 func (mr *MovieRepository) Get(id uuid.UUID) movie.Movie {
 	movie, exists :=  mr.DB.Movies[id]
-	
+	fmt.Println(movie)
+
 	if !exists {
 		fmt.Println("No movie with id:", id)
-		fmt.Println(movie)
 		return movie
 	}
 
 	return movie
+}
+
+func (mr *MovieRepository) GetAll() []movie.Movie {
+	var movies []movie.Movie
+
+	for _, movie := range mr.DB.Movies {
+		movies = append(movies, movie)
+	}
+
+	return movies
 }
 
 func (mr *MovieRepository) Update(id uuid.UUID, title string, year int) (movie.Movie, error) {
@@ -58,7 +68,7 @@ func (mr *MovieRepository) Delete(id uuid.UUID) {
 	
 	if !exists {
 		fmt.Println("No movie with id:", id)
-	}
-
-	delete(mr.DB.Movies, id)
+	} else {
+		delete(mr.DB.Movies, id)
+	}	
 }
