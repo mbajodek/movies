@@ -18,6 +18,7 @@ func New(db *db.MemoryDb) *MovieRepository {
 }
 
 func (mr *MovieRepository) Create(title string, year int) movie.Movie {
+	fmt.Println(title, year)
 	movie := movie.NewWithOptions(
 		movie.WithTitle(title),
 		movie.WithYear(year),
@@ -27,16 +28,16 @@ func (mr *MovieRepository) Create(title string, year int) movie.Movie {
 	return *movie
 }
 
-func (mr *MovieRepository) Get(id uuid.UUID) movie.Movie {
+func (mr *MovieRepository) Get(id uuid.UUID) (movie.Movie, bool) {
 	movie, exists :=  mr.DB.Movies[id]
 	fmt.Println(movie)
 
 	if !exists {
 		fmt.Println("No movie with id:", id)
-		return movie
+		return movie, false
 	}
 
-	return movie
+	return movie, true
 }
 
 func (mr *MovieRepository) GetAll() []movie.Movie {
