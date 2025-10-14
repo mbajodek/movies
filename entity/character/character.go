@@ -7,9 +7,9 @@ import (
 )
 
 type Character struct {
-	Id uuid.UUID
-	Name string
-	Movie movie.Movie
+	Id uuid.UUID 		`json:"id"`
+	Name string			`json:"name"`
+	Movie movie.Movie	`json:"movie"`
 }
 
 type Option func(movie Character) Character

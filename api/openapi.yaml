@@ -1,0 +1,241 @@
+openapi: 3.0.0
+info:
+  title: Api
+  version: 1.0.0
+
+components:
+  schemas:
+    CreateMovieRequest:
+      type: object
+      required: [title, year]
+      properties:
+        title:
+          type: string
+          example: Shrek
+        year:
+          type: integer
+          example: 2025
+    Movie:
+      type: object
+      required: [id, title, year]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: eda5cbc1-a615-4da5-ae73-4a33a9acfb6a
+        title:
+          type: string
+          example: Shrek
+        year:
+          type: integer
+          example: 2025
+    CreateCharacterRequest:
+      type: object
+      required: [name, movieId]
+      properties:
+        name:
+          type: string
+          example: Shrek
+        movieId:
+          type: string
+          format: uuid
+          example: eda5cbc1-a615-4da5-ae73-4a33a9acfb6a
+    UpdateCharacterRequest:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: eda5cbc1-a615-4da5-ae73-4a33a9acfb6a
+        name:
+          type: string
+          example: Shrek
+        movieId:
+          type: string
+          format: uuid
+          example: eda5cbc1-a615-4da5-ae73-4a33a9acfb6a
+    Character:
+      type: object
+      required: [id, name, movie]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: eda5cbc1-a615-4da5-ae73-4a33a9acfb6a
+        name:
+          type: string
+          example: Shrek
+        movie:
+          $ref: "#/components/schemas/Movie"
+
+paths:
+  /movies:
+    post:
+      summary: Create Movie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMovieRequest"
+      responses:
+        '201':
+          description: Movie created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+
+    put:
+      summary: Update Movie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Movie"
+      responses:
+        '201':
+          description: Movie updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+
+    get:
+      summary: Get all Movies
+      responses:
+        '201':
+          description: Movie updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Movie"
+
+  /movies/{id}:
+    get:
+      summary: Get Movie by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Movie get
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+
+    delete:
+      summary: Delete Movie
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Movie deleted
+
+  /characters:
+    post:
+      summary: Create Character
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCharacterRequest"
+      responses:
+        '201':
+          description: Character created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Character"
+        '412':
+          description: Movie validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    const: "Movie validation failed"
+
+    put:
+      summary: Update Character
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCharacterRequest"
+      responses:
+        '201':
+          description: Character updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Character"
+        '412':
+          description: Movie validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    const: "Movie validation failed"
+
+    get:
+      summary: Get all Characters
+      responses:
+        '201':
+          description: Character updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Character"
+
+  /characters/{id}:
+    get:
+      summary: Get Character by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Character get
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Character"
+
+    delete:
+      summary: Delete Character
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Character deleted

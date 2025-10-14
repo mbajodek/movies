@@ -1,14 +1,14 @@
 package main
 
+//go:generate go tool oapi-codegen -config ./api/codegen_server.yaml ./api/openapi.yaml
+
 import (
 	"movies/db"
 	"movies/db/character_repository"
 	"movies/db/movie_repository"
-	"movies/web"
-	"movies/web/handlers/character_handler"
-	"movies/web/handlers/movie_handler"
-	"net/http"
+	"movies/internal/server"
 
+	"github.com/go-resty/resty/v2"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -19,12 +19,12 @@ func main() {
 			db.New,
 			movie_repository.New,
 			character_repository.New,
-			movie_handler.New,
-			character_handler.New,
-			web.NewHTTPServer,
-			web.NewServeMux,
 			zap.NewExample,
+			resty.New,
+			server.NewStarWarsValidator,
 		),
-		fx.Invoke(func(*http.Server) {}),
+		fx.Invoke(
+			server.NewEchoServer,
+		),
 	).Run()
 }

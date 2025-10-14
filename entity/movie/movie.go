@@ -1,11 +1,14 @@
 package movie
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	openapi_types "github.com/oapi-codegen/runtime/types"
+)
 
 type Movie struct {
-	Id uuid.UUID
-	Year int
-	Title string
+	Id openapi_types.UUID `json:"id"`
+	Year int	 `json:"year"`
+	Title string `json:"title"`
 }
 
 type Option func(movie Movie) Movie

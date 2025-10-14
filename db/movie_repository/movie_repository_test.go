@@ -29,8 +29,8 @@ func TestGetMovie(t *testing.T) {
 
 	testMovie := mr.Create(title, year)
 
-	movieGet := mr.Get(testMovie.Id)
-	movieGetEmpty := mr.Get(uuid.New())
+	movieGet, _ := mr.Get(testMovie.Id)
+	movieGetEmpty, _ := mr.Get(uuid.New())
 
 	assert.NotEmpty(t, movieGet)
 	assert.Equal(t, title, movieGet.Title)
