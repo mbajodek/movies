@@ -22,14 +22,6 @@ func (s *Server) GetCharactersId(ctx context.Context, request api.GetCharactersI
 }
 
 func (s *Server) PostCharacters(ctx context.Context, request api.PostCharactersRequestObject) (api.PostCharactersResponseObject, error) {
-	validate := validator.New()
-	err := validate.Struct(request)
-
-	if err != nil {
-		fmt.Println("validation error:", err)
-		return nil, err
-	}
-
 	name := request.Body.Name
 	movieId := request.Body.MovieId
 	movie, exists := s.Mr.Get(movieId)
@@ -39,36 +31,25 @@ func (s *Server) PostCharacters(ctx context.Context, request api.PostCharactersR
 		fmt.Println(msg)
 		return api.PostCharacters412JSONResponse{Message: msg}, nil
 	}
-	
-	if isStarWarsMovie(movie.Title) {
-		existed, err := s.StarWarsValidator.CharacterExistsInMovie(name)
-	
-		if !existed {
-			msg := fmt.Sprintf("%s does not exists in Star Wars movie", name)
-			fmt.Println(msg)
-			return api.PostCharacters412JSONResponse{Message: msg}, err
-		}
+
+	if existed, msg, err := checkIfStarWarsMovieAndCharacterExists(s, movie.Title, name); !existed {
+		return api.PostCharacters412JSONResponse{Message: msg}, err
 	}
 
 	character := s.Cr.Create(name, movie)
 
-	return mapper.MapCharcterEntityToPostDto(character), nil
-}
-
-
-func isStarWarsMovie(title string) bool {
-	return strings.ToLower(title) == "star wars"
-}
-
-func (s *Server) PutCharacters(ctx context.Context, request api.PutCharactersRequestObject) (api.PutCharactersResponseObject, error) {
 	validate := validator.New()
-	err := validate.Struct(request)
+	err := validate.Struct(character)
 
 	if err != nil {
 		fmt.Println("validation error:", err)
 		return nil, err
 	}
 
+	return mapper.MapCharcterEntityToPostDto(character), nil
+}
+
+func (s *Server) PutCharacters(ctx context.Context, request api.PutCharactersRequestObject) (api.PutCharactersResponseObject, error) {
 	id := request.Body.Id
 	name := request.Body.Name
 	movieId := request.Body.MovieId
@@ -80,20 +61,22 @@ func (s *Server) PutCharacters(ctx context.Context, request api.PutCharactersReq
 		return api.PutCharacters412JSONResponse{Message: msg}, nil
 	}
 
-	if isStarWarsMovie(movie.Title) {
-		existed, err := s.StarWarsValidator.CharacterExistsInMovie(name)
-
-		if !existed {
-			msg := fmt.Sprintf("%s does not exists in Star Wars movie", name)
-			fmt.Println(msg)
-			return api.PutCharacters412JSONResponse{Message: msg}, err
-		}
+	if existed, msg, err := checkIfStarWarsMovieAndCharacterExists(s, movie.Title, name); !existed {
+		return api.PutCharacters412JSONResponse{Message: msg}, err
 	}
 
 	character, err := s.Cr.Update(id, name, movie)
 
 	if err != nil {
 		fmt.Println("Update movie error:", err)
+		return nil, err
+	}
+
+	validate := validator.New()
+	err = validate.Struct(character)
+
+	if err != nil {
+		fmt.Println("validation error:", err)
 		return nil, err
 	}
 
@@ -104,4 +87,21 @@ func (s *Server) DeleteCharactersId(ctx context.Context, request api.DeleteChara
 	s.Cr.Delete(request.Id)
 
 	return nil, nil
+}
+
+func checkIfStarWarsMovieAndCharacterExists(s *Server, title, name string) (bool, string, error) {
+	if isStarWarsMovie(title) {
+		existed, err := s.StarWarsValidator.CharacterExistsInMovie(name)
+	
+		if !existed {
+			msg := fmt.Sprintf("%s does not exists in Star Wars movie", name)
+			fmt.Println(msg)
+			return false, msg, err
+		}
+	}
+	return true, "", nil
+}
+
+func isStarWarsMovie(title string) bool {
+	return strings.ToLower(title) == "star wars"
 }

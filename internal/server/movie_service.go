@@ -10,18 +10,18 @@ import (
 )
 
 func (s *Server) PostMovies(_ context.Context, request api.PostMoviesRequestObject) (api.PostMoviesResponseObject, error) {
+	title := request.Body.Title
+	year := request.Body.Year
+
+	movie := s.Mr.Create(title, year)
+
 	validate := validator.New()
-	err := validate.Struct(request)
+	err := validate.Struct(movie)
 
 	if err != nil {
 		fmt.Println("validation error:", err)
 		return nil, err
 	}
-
-	title := request.Body.Title
-	year := request.Body.Year
-
-	movie := s.Mr.Create(title, year)
 
 	return mapper.MapMovieEntityToPostDto(movie), nil
 }
@@ -48,14 +48,6 @@ func (s *Server) GetMoviesId(ctx context.Context, request api.GetMoviesIdRequest
 }
 
 func (s *Server) PutMovies(ctx context.Context, request api.PutMoviesRequestObject) (api.PutMoviesResponseObject, error) {
-	validate := validator.New()
-	err := validate.Struct(request)
-
-	if err != nil {
-		fmt.Println("validation error:", err)
-		return nil, err
-	}
-
 	id := request.Body.Id
 	title := request.Body.Title
 	year := request.Body.Year
@@ -64,6 +56,14 @@ func (s *Server) PutMovies(ctx context.Context, request api.PutMoviesRequestObje
 
 	if err != nil {
 		fmt.Println("Update movie error:", err)
+		return nil, err
+	}
+
+	validate := validator.New()
+	err = validate.Struct(movie)
+
+	if err != nil {
+		fmt.Println("validation error:", err)
 		return nil, err
 	}
 
