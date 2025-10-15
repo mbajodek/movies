@@ -24,52 +24,55 @@ func (mr *MovieRepository) Create(title string, year int) movie.Movie {
 		movie.WithYear(year),
 	)
 
-	mr.DB.Movies[movie.Id] = *movie
+	mr.DB.Movies.Store(movie.Id, *movie)
 	return *movie
 }
 
 func (mr *MovieRepository) Get(id uuid.UUID) (movie.Movie, bool) {
-	movie, exists :=  mr.DB.Movies[id]
-	fmt.Println(movie)
+	v, ok :=  mr.DB.Movies.Load(id)
+	var m movie.Movie
 
-	if !exists {
+	if !ok {
 		fmt.Println("No movie with id:", id)
-		return movie, false
+		return m, false
 	}
+	m = v.(movie.Movie)
 
-	return movie, true
+	return m, true
 }
 
 func (mr *MovieRepository) GetAll() []movie.Movie {
 	var movies []movie.Movie
-
-	for _, movie := range mr.DB.Movies {
-		movies = append(movies, movie)
-	}
+	mr.DB.Movies.Range(func(key, value interface{}) bool {
+        movies = append(movies, value.(movie.Movie))
+        return true
+    })
 
 	return movies
 }
 
 func (mr *MovieRepository) Update(id uuid.UUID, title string, year int) (movie.Movie, error) {
-	movie, exists :=  mr.DB.Movies[id]
+	v, ok :=  mr.DB.Movies.Load(id)
+	var m movie.Movie
 	
-	if !exists {
+	if !ok {
 		fmt.Println("No movie with id:", id)
-		return movie, errors.New("No movie with id: " + id.String())
+		return m, errors.New("No movie with id: " + id.String())
 	}
-	movie.Year = year
-	movie.Title = title
-	mr.DB.Movies[id] = movie
+	m = v.(movie.Movie)
+	m.Year = year
+	m.Title = title
+	mr.DB.Movies.Swap(id, m)
 
-	return movie, nil
+	return m, nil
 }
 
 func (mr *MovieRepository) Delete(id uuid.UUID) {
-	_, exists :=  mr.DB.Movies[id]
+	_, ok :=  mr.DB.Movies.Load(id)
 	
-	if !exists {
+	if !ok {
 		fmt.Println("No movie with id:", id)
 	} else {
-		delete(mr.DB.Movies, id)
+		mr.DB.Movies.Delete(id)
 	}	
 }

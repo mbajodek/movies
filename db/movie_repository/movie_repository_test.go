@@ -2,6 +2,7 @@ package movie_repository
 
 import (
 	"movies/db"
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
@@ -16,7 +17,7 @@ func TestNewMovie(t *testing.T) {
 
 	testMovie := mr.Create(title, year)
 
-	assert.Equal(t, 1, len(db.Movies))
+	assert.Equal(t, 1, getMapLength(&db.Movies))
 	assert.Equal(t, title, testMovie.Title)
 	assert.Equal(t, year, testMovie.Year)
 }
@@ -64,5 +65,15 @@ func TestDeleteMovie(t *testing.T) {
 	mr.Delete(m2.Id)
 	mr.Delete(m3.Id)
 
-	assert.Equal(t, 1, len(db.Movies))
+	assert.Equal(t, 1, getMapLength(&db.Movies))
+}
+
+func getMapLength(m *sync.Map) int {
+	length := 0
+	m.Range(func(key, value any) bool {
+		length++
+		return true 
+	})
+
+	return length
 }

@@ -3,6 +3,7 @@ package character_repository
 import (
 	"movies/db"
 	"movies/entity/movie"
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
@@ -17,7 +18,7 @@ func TestNewMovie(t *testing.T) {
 
 	testCharacter := cr.Create(name, movie)
 
-	assert.Equal(t, 1, len(db.Characters))
+	assert.Equal(t, 1, getMapLength(&db.Characters))
 	assert.Equal(t, name, testCharacter.Name)
 	assert.Equal(t, movie, testCharacter.Movie)
 }
@@ -66,9 +67,19 @@ func TestDeleteMovie(t *testing.T) {
 
 	cr.Delete(c.Id)
 
-	assert.Equal(t, 0, len(db.Characters))
+	assert.Equal(t, 0, getMapLength(&db.Characters))
 }
 
 func GetMovie(id uuid.UUID, year int, title string) movie.Movie {
 	return movie.Movie{Id: id, Year: year, Title: title}
+}
+
+func getMapLength(m *sync.Map) int {
+	length := 0
+	m.Range(func(key, value any) bool {
+		length++
+		return true 
+	})
+
+	return length
 }
