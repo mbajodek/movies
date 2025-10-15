@@ -6,9 +6,9 @@ import (
 )
 
 type Movie struct {
-	Id openapi_types.UUID `json:"id"`
-	Year int	 `json:"year"`
-	Title string `json:"title"`
+	Id openapi_types.UUID `json:"id" validate:"required"`
+	Year int	 `json:"year" validate:"required,min=1800"`
+	Title string `json:"title" validate:"required"`
 }
 
 type Option func(movie Movie) Movie
