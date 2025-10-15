@@ -24,52 +24,56 @@ func (mr *CharacterRepository) Create(name string, movie movie.Movie) character.
 		character.WithMovie(movie),
 	)
 
-	mr.DB.Characters[character.Id] = *character
+	mr.DB.Characters.Store(character.Id, *character)
 	return *character
 }
 
 func (mr *CharacterRepository) Get(id uuid.UUID) character.Character {
-	character, exists :=  mr.DB.Characters[id]
-	
-	if !exists {
-		fmt.Println("No character with id:", id)
-		fmt.Println(character)
-		return character
-	}
+	v, ok :=  mr.DB.Characters.Load(id)
+	var c character.Character
 
-	return character
+	if !ok {
+		fmt.Println("No character with id:", id)
+		return c
+	}
+	c = v.(character.Character)
+
+	return c
 }
 
 func (mr *CharacterRepository) GetAll() []character.Character {
 	var characters []character.Character
 
-	for _, character := range mr.DB.Characters {
-		characters = append(characters, character)
-	}
+	mr.DB.Characters.Range(func(key, value interface{}) bool {
+        characters = append(characters, value.(character.Character))
+        return true
+    })
 
 	return characters
 }
 
 func (mr *CharacterRepository) Update(id uuid.UUID, name string, movie movie.Movie) (character.Character, error) {
-	character, exists :=  mr.DB.Characters[id]
+	v, ok :=  mr.DB.Characters.Load(id)
+	var c character.Character
 	
-	if !exists {
+	if !ok {
 		fmt.Println("No character with id:", id)
-		return character, errors.New("No character with id: " + id.String())
+		return c, errors.New("No character with id: " + id.String())
 	}
-	character.Name = name
-	character.Movie = movie
-	mr.DB.Characters[id] = character
+	c = v.(character.Character)
+	c.Name = name
+	c.Movie = movie
+	mr.DB.Characters.Swap(id, c)
 
-	return character, nil
+	return c, nil
 }
 
 func (mr *CharacterRepository) Delete(id uuid.UUID) {
-	_, exists :=  mr.DB.Characters[id]
+	_, ok :=  mr.DB.Characters.Load(id)
 	
-	if !exists {
+	if !ok {
 		fmt.Println("No character with id:", id)
 	}
 
-	delete(mr.DB.Characters, id)
+	mr.DB.Characters.Delete(id)
 }

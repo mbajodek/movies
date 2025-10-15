@@ -1,20 +1,14 @@
 package db
 
 import (
-	"movies/entity/character"
-	"movies/entity/movie"
-
-	"github.com/google/uuid"
+	"sync"
 )
 
 type MemoryDb struct {
-	Movies map[uuid.UUID]movie.Movie
-	Characters map[uuid.UUID]character.Character
+	Movies sync.Map
+	Characters sync.Map
 }
 
 func New() *MemoryDb {
-	return &MemoryDb{
-		Movies: make(map[uuid.UUID]movie.Movie),
-		Characters: make(map[uuid.UUID]character.Character),
-	}
+	return &MemoryDb{ }
 }
