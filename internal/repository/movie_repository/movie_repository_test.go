@@ -1,7 +1,7 @@
 package movie_repository
 
 import (
-	"movies/db"
+	"movies/internal/db"
 	"sync"
 	"testing"
 

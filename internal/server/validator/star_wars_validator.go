@@ -1,4 +1,4 @@
-package server
+package validator
 
 import (
 	"encoding/json"
@@ -7,6 +7,8 @@ import (
 
 	"github.com/go-resty/resty/v2"
 )
+
+var searchUrl = "https://swapi.dev/api/people/?search=%s"
 
 type CharacterSearchResult struct {
 	Count int `json:"count"`
@@ -21,7 +23,7 @@ func NewStarWarsValidator(rc *resty.Client) *StarWarsValidator {
 }
 
 func (validator StarWarsValidator) CharacterExistsInMovie(name string) (bool, error) {
-	url := strings.ReplaceAll(fmt.Sprintf("https://swapi.dev/api/people/?search=%s", name), " ", "+")
+	url := strings.ReplaceAll(fmt.Sprintf(searchUrl, name), " ", "+")
 	res, err := validator.restyClient.R().Get(url)
 
 	if err != nil {

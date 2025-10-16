@@ -1,7 +1,7 @@
 package mapper
 
 import (
-	"movies/entity/character"
+	"movies/internal/entity/character"
 	"movies/internal/api"
 )
 

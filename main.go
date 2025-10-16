@@ -3,10 +3,11 @@ package main
 //go:generate go tool oapi-codegen -config ./api/codegen_server.yaml ./api/openapi.yaml
 
 import (
-	"movies/db"
-	"movies/db/character_repository"
-	"movies/db/movie_repository"
+	"movies/internal/db"
+	"movies/internal/repository/character_repository"
+	"movies/internal/repository/movie_repository"
 	"movies/internal/server"
+	"movies/internal/server/validator"
 
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/fx"
@@ -21,7 +22,7 @@ func main() {
 			character_repository.New,
 			zap.NewExample,
 			resty.New,
-			server.NewStarWarsValidator,
+			validator.NewStarWarsValidator,
 		),
 		fx.Invoke(
 			server.NewEchoServer,

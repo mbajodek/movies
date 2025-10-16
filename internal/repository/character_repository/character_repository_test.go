@@ -1,8 +1,8 @@
 package character_repository
 
 import (
-	"movies/db"
-	"movies/entity/movie"
+	"movies/internal/db"
+	"movies/internal/entity/movie"
 	"sync"
 	"testing"
 

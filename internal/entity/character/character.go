@@ -1,7 +1,7 @@
 package character
 
 import (
-	"movies/entity/movie"
+	"movies/internal/entity/movie"
 
 	"github.com/google/uuid"
 )

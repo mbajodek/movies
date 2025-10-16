@@ -3,9 +3,9 @@ package character_repository
 import (
 	"errors"
 	"fmt"
-	"movies/db"
-	"movies/entity/character"
-	"movies/entity/movie"
+	"movies/internal/db"
+	"movies/internal/entity/character"
+	"movies/internal/entity/movie"
 
 	"github.com/google/uuid"
 )
