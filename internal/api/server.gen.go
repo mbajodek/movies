@@ -77,6 +77,9 @@ type ServerInterface interface {
 	// Get Character by id
 	// (GET /characters/{id})
 	GetCharactersId(ctx echo.Context, id openapi_types.UUID) error
+	// Get character cert by id
+	// (GET /characters/{id}/cert)
+	GetCharactersIdCert(ctx echo.Context, id openapi_types.UUID) error
 	// Get all Movies
 	// (GET /movies)
 	GetMovies(ctx echo.Context) error
@@ -92,6 +95,9 @@ type ServerInterface interface {
 	// Get Movie by id
 	// (GET /movies/{id})
 	GetMoviesId(ctx echo.Context, id openapi_types.UUID) error
+	// Get Movie cert by id
+	// (GET /movies/{id}/cert)
+	GetMoviesIdCert(ctx echo.Context, id openapi_types.UUID) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -158,6 +164,22 @@ func (w *ServerInterfaceWrapper) GetCharactersId(ctx echo.Context) error {
 	return err
 }
 
+// GetCharactersIdCert converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCharactersIdCert(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetCharactersIdCert(ctx, id)
+	return err
+}
+
 // GetMovies converts echo context to params.
 func (w *ServerInterfaceWrapper) GetMovies(ctx echo.Context) error {
 	var err error
@@ -217,6 +239,22 @@ func (w *ServerInterfaceWrapper) GetMoviesId(ctx echo.Context) error {
 	return err
 }
 
+// GetMoviesIdCert converts echo context to params.
+func (w *ServerInterfaceWrapper) GetMoviesIdCert(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetMoviesIdCert(ctx, id)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -250,11 +288,13 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.PUT(baseURL+"/characters", wrapper.PutCharacters)
 	router.DELETE(baseURL+"/characters/:id", wrapper.DeleteCharactersId)
 	router.GET(baseURL+"/characters/:id", wrapper.GetCharactersId)
+	router.GET(baseURL+"/characters/:id/cert", wrapper.GetCharactersIdCert)
 	router.GET(baseURL+"/movies", wrapper.GetMovies)
 	router.POST(baseURL+"/movies", wrapper.PostMovies)
 	router.PUT(baseURL+"/movies", wrapper.PutMovies)
 	router.DELETE(baseURL+"/movies/:id", wrapper.DeleteMoviesId)
 	router.GET(baseURL+"/movies/:id", wrapper.GetMoviesId)
+	router.GET(baseURL+"/movies/:id/cert", wrapper.GetMoviesIdCert)
 
 }
 
@@ -363,6 +403,24 @@ func (response GetCharactersId201JSONResponse) VisitGetCharactersIdResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetCharactersIdCertRequestObject struct {
+	Id openapi_types.UUID `json:"id"`
+}
+
+type GetCharactersIdCertResponseObject interface {
+	VisitGetCharactersIdCertResponse(w http.ResponseWriter) error
+}
+
+type GetCharactersIdCert201TextResponse string
+
+func (response GetCharactersIdCert201TextResponse) VisitGetCharactersIdCertResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(201)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type GetMoviesRequestObject struct {
 }
 
@@ -446,6 +504,24 @@ func (response GetMoviesId201JSONResponse) VisitGetMoviesIdResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetMoviesIdCertRequestObject struct {
+	Id openapi_types.UUID `json:"id"`
+}
+
+type GetMoviesIdCertResponseObject interface {
+	VisitGetMoviesIdCertResponse(w http.ResponseWriter) error
+}
+
+type GetMoviesIdCert201TextResponse string
+
+func (response GetMoviesIdCert201TextResponse) VisitGetMoviesIdCertResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(201)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Get all Characters
@@ -463,6 +539,9 @@ type StrictServerInterface interface {
 	// Get Character by id
 	// (GET /characters/{id})
 	GetCharactersId(ctx context.Context, request GetCharactersIdRequestObject) (GetCharactersIdResponseObject, error)
+	// Get character cert by id
+	// (GET /characters/{id}/cert)
+	GetCharactersIdCert(ctx context.Context, request GetCharactersIdCertRequestObject) (GetCharactersIdCertResponseObject, error)
 	// Get all Movies
 	// (GET /movies)
 	GetMovies(ctx context.Context, request GetMoviesRequestObject) (GetMoviesResponseObject, error)
@@ -478,6 +557,9 @@ type StrictServerInterface interface {
 	// Get Movie by id
 	// (GET /movies/{id})
 	GetMoviesId(ctx context.Context, request GetMoviesIdRequestObject) (GetMoviesIdResponseObject, error)
+	// Get Movie cert by id
+	// (GET /movies/{id}/cert)
+	GetMoviesIdCert(ctx context.Context, request GetMoviesIdCertRequestObject) (GetMoviesIdCertResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -623,6 +705,31 @@ func (sh *strictHandler) GetCharactersId(ctx echo.Context, id openapi_types.UUID
 	return nil
 }
 
+// GetCharactersIdCert operation middleware
+func (sh *strictHandler) GetCharactersIdCert(ctx echo.Context, id openapi_types.UUID) error {
+	var request GetCharactersIdCertRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCharactersIdCert(ctx.Request().Context(), request.(GetCharactersIdCertRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCharactersIdCert")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetCharactersIdCertResponseObject); ok {
+		return validResponse.VisitGetCharactersIdCertResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // GetMovies operation middleware
 func (sh *strictHandler) GetMovies(ctx echo.Context) error {
 	var request GetMoviesRequestObject
@@ -748,6 +855,31 @@ func (sh *strictHandler) GetMoviesId(ctx echo.Context, id openapi_types.UUID) er
 		return err
 	} else if validResponse, ok := response.(GetMoviesIdResponseObject); ok {
 		return validResponse.VisitGetMoviesIdResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// GetMoviesIdCert operation middleware
+func (sh *strictHandler) GetMoviesIdCert(ctx echo.Context, id openapi_types.UUID) error {
+	var request GetMoviesIdCertRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMoviesIdCert(ctx.Request().Context(), request.(GetMoviesIdCertRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMoviesIdCert")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetMoviesIdCertResponseObject); ok {
+		return validResponse.VisitGetMoviesIdCertResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}

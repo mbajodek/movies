@@ -13,10 +13,16 @@ func (s *Server) PostMovies(_ context.Context, request api.PostMoviesRequestObje
 	title := request.Body.Title
 	year := request.Body.Year
 
-	movie := s.Mr.Create(title, year)
+	cert, priv, err := s.CertGenerator.GenerateMovieCert()
+	if err != nil {
+		fmt.Println("cert generation error:", err)
+		return nil, err
+	}
+
+	movie := s.Mr.Create(title, year, cert, priv)
 
 	validate := validator.New()
-	err := validate.Struct(movie)
+	err = validate.Struct(movie)
 
 	if err != nil {
 		fmt.Println("validation error:", err)
@@ -68,4 +74,10 @@ func (s *Server) PutMovies(ctx context.Context, request api.PutMoviesRequestObje
 	}
 
 	return mapper.MapMovieEntityToUpdateDto(movie), nil
+}
+
+func (s *Server) GetMoviesIdCert(ctx context.Context, request api.GetMoviesIdCertRequestObject) (api.GetMoviesIdCertResponseObject, error) {
+	movie, _ := s.Mr.Get(request.Id)
+
+	return api.GetMoviesIdCert201TextResponse(movie.GetCertString()), nil
 }
