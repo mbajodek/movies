@@ -146,6 +146,24 @@ paths:
         '200':
           description: Movie deleted
 
+  /movies/{id}/cert:
+    get:
+      summary: Get Movie cert by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Movie cert get
+          content:
+            text/plain:
+              schema:
+                type: string
+
   /characters:
     post:
       summary: Create Character
@@ -239,3 +257,21 @@ paths:
       responses:
         '200':
           description: Character deleted
+
+  /characters/{id}/cert:
+    get:
+      summary: Get character cert by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Character cert get
+          content:
+            text/plain:
+              schema:
+                type: string

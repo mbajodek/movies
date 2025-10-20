@@ -1,7 +1,10 @@
 package movie_repository
 
 import (
-	"movies/db"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"movies/internal/db"
 	"sync"
 	"testing"
 
@@ -14,8 +17,10 @@ func TestNewMovie(t *testing.T) {
 	mr := New(db)
 	title := "test title"
 	year := 2025
+	cert := x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 
-	testMovie := mr.Create(title, year)
+	testMovie := mr.Create(title, year, &cert, priv)
 
 	assert.Equal(t, 1, getMapLength(&db.Movies))
 	assert.Equal(t, title, testMovie.Title)
@@ -27,8 +32,10 @@ func TestGetMovie(t *testing.T) {
 	mr := New(db)
 	title := "test title"
 	year := 2025
+	cert := x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 
-	testMovie := mr.Create(title, year)
+	testMovie := mr.Create(title, year, &cert, priv)
 
 	movieGet, _ := mr.Get(testMovie.Id)
 	movieGetEmpty, _ := mr.Get(uuid.New())
@@ -45,8 +52,10 @@ func TestUpdateMovie(t *testing.T) {
 	mr := New(db)
 	title := "test title"
 	year := 2025
+	cert := x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 
-	testMovie := mr.Create(title, year)
+	testMovie := mr.Create(title, year, &cert, priv)
 
 	updatedMovie, error := mr.Update(testMovie.Id, "updated", 2000)
 
@@ -58,9 +67,11 @@ func TestUpdateMovie(t *testing.T) {
 func TestDeleteMovie(t *testing.T) {
 	db := db.New()
 	mr := New(db)
-	mr.Create("test 1", 2000)
-	m2 := mr.Create("test 2", 2001)
-	m3 := mr.Create("test 3", 2002)
+	cert := x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	mr.Create("test 1", 2000, &cert, priv)
+	m2 := mr.Create("test 2", 2001, &cert, priv)
+	m3 := mr.Create("test 3", 2002, &cert, priv)
 
 	mr.Delete(m2.Id)
 	mr.Delete(m3.Id)

@@ -1,12 +1,13 @@
-package server
+package validator
 
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/go-resty/resty/v2"
 )
+
+var peopleUrl = "https://swapi.dev/api/people/"
 
 type CharacterSearchResult struct {
 	Count int `json:"count"`
@@ -16,13 +17,16 @@ type StarWarsValidator struct {
 	restyClient *resty.Client
 }
 
-func NewStarWarsValidator(rc *resty.Client) *StarWarsValidator {
-	return &StarWarsValidator{restyClient: rc}
+func NewStarWarsValidator() *StarWarsValidator {
+	return &StarWarsValidator{
+		restyClient: resty.New(),
+	}
 }
 
 func (validator StarWarsValidator) CharacterExistsInMovie(name string) (bool, error) {
-	url := strings.ReplaceAll(fmt.Sprintf("https://swapi.dev/api/people/?search=%s", name), " ", "+")
-	res, err := validator.restyClient.R().Get(url)
+	res, err := validator.restyClient.R().
+		SetQueryParam("search", name).
+		Get(peopleUrl)
 
 	if err != nil {
 		fmt.Println("swapi error:" , err)

@@ -1,0 +1,6 @@
+services:
+  movies:
+    image: go-movies
+    container_name: go-movies
+    ports:
+      - 8080:8080

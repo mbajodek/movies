@@ -25,6 +25,11 @@ func (s *Server) PostCharacters(ctx context.Context, request api.PostCharactersR
 	name := request.Body.Name
 	movieId := request.Body.MovieId
 	movie, exists := s.Mr.Get(movieId)
+	cert, priv, err := s.CertGenerator.GenerateCharacterCert(movie.GetCert(), movie.GetPrivateKey())
+	if err != nil {
+		fmt.Println("cert generation error:", err)
+		return nil, err
+	}
 	
 	if !exists {
 		msg := fmt.Sprintf("Movie with id: %s does not exist", movieId)
@@ -36,10 +41,10 @@ func (s *Server) PostCharacters(ctx context.Context, request api.PostCharactersR
 		return api.PostCharacters412JSONResponse{Message: msg}, err
 	}
 
-	character := s.Cr.Create(name, movie)
+	character := s.Cr.Create(name, movie, cert, priv)
 
 	validate := validator.New()
-	err := validate.Struct(character)
+	err = validate.Struct(character)
 
 	if err != nil {
 		fmt.Println("validation error:", err)
@@ -87,6 +92,12 @@ func (s *Server) DeleteCharactersId(ctx context.Context, request api.DeleteChara
 	s.Cr.Delete(request.Id)
 
 	return nil, nil
+}
+
+func (s *Server) GetCharactersIdCert(ctx context.Context, request api.GetCharactersIdCertRequestObject) (api.GetCharactersIdCertResponseObject, error) {
+	character := s.Cr.Get(request.Id)
+
+	return api.GetCharactersIdCert201TextResponse(character.GetCertString()), nil
 }
 
 func checkIfStarWarsMovieAndCharacterExists(s *Server, title, name string) (bool, string, error) {

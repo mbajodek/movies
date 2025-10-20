@@ -1,8 +1,11 @@
 package character_repository
 
 import (
-	"movies/db"
-	"movies/entity/movie"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"movies/internal/db"
+	"movies/internal/entity/movie"
 	"sync"
 	"testing"
 
@@ -15,8 +18,10 @@ func TestNewMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
+	cert := &x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 
-	testCharacter := cr.Create(name, movie)
+	testCharacter := cr.Create(name, movie, cert, priv)
 
 	assert.Equal(t, 1, getMapLength(&db.Characters))
 	assert.Equal(t, name, testCharacter.Name)
@@ -28,8 +33,10 @@ func TestGetMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
+	cert := &x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 
-	testCharacter := cr.Create(name, movie)
+	testCharacter := cr.Create(name, movie, cert, priv)
 
 	characterGet := cr.Get(testCharacter.Id)
 	characterGetEmpty := cr.Get(uuid.New())
@@ -46,8 +53,10 @@ func TestUpdateMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
+	cert := &x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 
-	testCharacter := cr.Create(name, movie)
+	testCharacter := cr.Create(name, movie, cert, priv)
 
 	updatedMovie := GetMovie(uuid.New(), 2025, "updated title")
 	updatedCharacter, error := cr.Update(testCharacter.Id, "updated", updatedMovie)
@@ -62,8 +71,10 @@ func TestDeleteMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
+	cert := &x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 
-	c := cr.Create(name, movie)
+	c := cr.Create(name, movie, cert, priv)
 
 	cr.Delete(c.Id)
 
