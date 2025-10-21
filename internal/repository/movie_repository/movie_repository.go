@@ -1,8 +1,6 @@
 package movie_repository
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"movies/internal/db"
@@ -19,17 +17,9 @@ func New(db *db.MemoryDb) *MovieRepository {
 	return &MovieRepository{DB: db}
 }
 
-func (mr *MovieRepository) Create(title string, year int, cert *x509.Certificate, privateKey *rsa.PrivateKey) movie.Movie {
-	fmt.Println(title, year)
-	movie := movie.NewWithOptions(
-		movie.WithTitle(title),
-		movie.WithYear(year),
-		movie.WithCert(cert, privateKey),
-	)
-
-	fmt.Println(movie)
-	mr.DB.Movies.Store(movie.Id, *movie)
-	return *movie
+func (mr *MovieRepository) Create(movie movie.Movie) movie.Movie {
+	mr.DB.Movies.Store(movie.Id, movie)
+	return movie
 }
 
 func (mr *MovieRepository) Get(id uuid.UUID) (movie.Movie, bool) {

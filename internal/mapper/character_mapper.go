@@ -1,8 +1,11 @@
 package mapper
 
 import (
-	"movies/internal/entity/character"
+	"crypto/rsa"
+	"crypto/x509"
 	"movies/internal/api"
+	"movies/internal/entity/character"
+	"movies/internal/entity/movie"
 )
 
 func MapCharcterEntityToPostDto(character character.Character) api.PostCharacters201JSONResponse {
@@ -28,7 +31,15 @@ func MapCharacterEntityToUpdateDto(character character.Character) api.PutCharact
 func MapCharacter(character character.Character) api.Character {
 	return api.Character{
 		Id:    character.Id,
-		Name: character.Name,
-		Movie:  MapMovie(character.Movie),
+		Name:  character.Name,
+		Movie: MapMovie(character.Movie),
 	}
+}
+
+func MapCharacterRequestToEntity(name string, movie movie.Movie, cert *x509.Certificate, privateKey *rsa.PrivateKey) character.Character {
+	return *character.NewWithOptions(
+		character.WithName(name),
+		character.WithMovie(movie),
+		character.WithCert(cert, privateKey),
+	)
 }

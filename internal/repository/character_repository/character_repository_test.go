@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"movies/internal/db"
+	"movies/internal/entity/character"
 	"movies/internal/entity/movie"
 	"sync"
 	"testing"
@@ -18,10 +19,9 @@ func TestNewMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
-	cert := &x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	character := getTestCharacter(name, movie)
 
-	testCharacter := cr.Create(name, movie, cert, priv)
+	testCharacter := cr.Create(character)
 
 	assert.Equal(t, 1, getMapLength(&db.Characters))
 	assert.Equal(t, name, testCharacter.Name)
@@ -33,10 +33,9 @@ func TestGetMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
-	cert := &x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	character := getTestCharacter(name, movie)
 
-	testCharacter := cr.Create(name, movie, cert, priv)
+	testCharacter := cr.Create(character)
 
 	characterGet := cr.Get(testCharacter.Id)
 	characterGetEmpty := cr.Get(uuid.New())
@@ -53,10 +52,9 @@ func TestUpdateMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
-	cert := &x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	character := getTestCharacter(name, movie)
 
-	testCharacter := cr.Create(name, movie, cert, priv)
+	testCharacter := cr.Create(character)
 
 	updatedMovie := GetMovie(uuid.New(), 2025, "updated title")
 	updatedCharacter, error := cr.Update(testCharacter.Id, "updated", updatedMovie)
@@ -71,10 +69,9 @@ func TestDeleteMovie(t *testing.T) {
 	cr := New(db)
 	movie := GetMovie(uuid.New(), 2000, "test title")
 	name := "test name"
-	cert := &x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	character := getTestCharacter(name, movie)
 
-	c := cr.Create(name, movie, cert, priv)
+	c := cr.Create(character)
 
 	cr.Delete(c.Id)
 
@@ -83,6 +80,16 @@ func TestDeleteMovie(t *testing.T) {
 
 func GetMovie(id uuid.UUID, year int, title string) movie.Movie {
 	return movie.Movie{Id: id, Year: year, Title: title}
+}
+
+func getTestCharacter(name string, movie movie.Movie) character.Character {
+	cert := x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	return *character.NewWithOptions(
+		character.WithMovie(movie),
+		character.WithName(name),
+		character.WithCert(&cert, priv),
+	)
 }
 
 func getMapLength(m *sync.Map) int {

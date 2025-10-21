@@ -10,16 +10,13 @@ import (
 )
 
 func (s *Server) PostMovies(_ context.Context, request api.PostMoviesRequestObject) (api.PostMoviesResponseObject, error) {
-	title := request.Body.Title
-	year := request.Body.Year
-
 	cert, priv, err := s.CertGenerator.GenerateMovieCert()
 	if err != nil {
 		fmt.Println("cert generation error:", err)
 		return nil, err
 	}
 
-	movie := s.Mr.Create(title, year, cert, priv)
+	movie := mapper.MapMoviePostRequestBodyToEntity(request.Body, cert, priv)
 
 	validate := validator.New()
 	err = validate.Struct(movie)
@@ -29,7 +26,7 @@ func (s *Server) PostMovies(_ context.Context, request api.PostMoviesRequestObje
 		return nil, err
 	}
 
-	return mapper.MapMovieEntityToPostDto(movie), nil
+	return mapper.MapMovieEntityToPostDto(s.Mr.Create(movie)), nil
 }
 
 func (s *Server) GetMovies(ctx context.Context, request api.GetMoviesRequestObject) (api.GetMoviesResponseObject, error) {
