@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"movies/internal/db"
+	"movies/internal/entity/movie"
 	"sync"
 	"testing"
 
@@ -17,10 +18,9 @@ func TestNewMovie(t *testing.T) {
 	mr := New(db)
 	title := "test title"
 	year := 2025
-	cert := x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	movie := getTestMovie(title, year)
 
-	testMovie := mr.Create(title, year, &cert, priv)
+	testMovie := mr.Create(movie)
 
 	assert.Equal(t, 1, getMapLength(&db.Movies))
 	assert.Equal(t, title, testMovie.Title)
@@ -32,10 +32,9 @@ func TestGetMovie(t *testing.T) {
 	mr := New(db)
 	title := "test title"
 	year := 2025
-	cert := x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	movie := getTestMovie(title, year)
 
-	testMovie := mr.Create(title, year, &cert, priv)
+	testMovie := mr.Create(movie)
 
 	movieGet, _ := mr.Get(testMovie.Id)
 	movieGetEmpty, _ := mr.Get(uuid.New())
@@ -52,10 +51,9 @@ func TestUpdateMovie(t *testing.T) {
 	mr := New(db)
 	title := "test title"
 	year := 2025
-	cert := x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	movie := getTestMovie(title, year)
 
-	testMovie := mr.Create(title, year, &cert, priv)
+	testMovie := mr.Create(movie)
 
 	updatedMovie, error := mr.Update(testMovie.Id, "updated", 2000)
 
@@ -67,16 +65,24 @@ func TestUpdateMovie(t *testing.T) {
 func TestDeleteMovie(t *testing.T) {
 	db := db.New()
 	mr := New(db)
-	cert := x509.Certificate{}
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
-	mr.Create("test 1", 2000, &cert, priv)
-	m2 := mr.Create("test 2", 2001, &cert, priv)
-	m3 := mr.Create("test 3", 2002, &cert, priv)
+	mr.Create(getTestMovie("test 1", 2000))
+	m2 := mr.Create(getTestMovie("test 2", 2001))
+	m3 := mr.Create(getTestMovie("test 3", 2002))
 
 	mr.Delete(m2.Id)
 	mr.Delete(m3.Id)
 
 	assert.Equal(t, 1, getMapLength(&db.Movies))
+}
+
+func getTestMovie(title string, year int) movie.Movie {
+	cert := x509.Certificate{}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	return *movie.NewWithOptions(
+		movie.WithTitle(title),
+		movie.WithYear(year),
+		movie.WithCert(&cert, priv),
+	)
 }
 
 func getMapLength(m *sync.Map) int {

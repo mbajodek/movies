@@ -41,7 +41,7 @@ func (s *Server) PostCharacters(ctx context.Context, request api.PostCharactersR
 		return api.PostCharacters412JSONResponse{Message: msg}, err
 	}
 
-	character := s.Cr.Create(name, movie, cert, priv)
+	character := mapper.MapCharacterRequestToEntity(name, movie, cert, priv)
 
 	validate := validator.New()
 	err = validate.Struct(character)
@@ -51,7 +51,7 @@ func (s *Server) PostCharacters(ctx context.Context, request api.PostCharactersR
 		return nil, err
 	}
 
-	return mapper.MapCharcterEntityToPostDto(character), nil
+	return mapper.MapCharcterEntityToPostDto(s.Cr.Create(character)), nil
 }
 
 func (s *Server) PutCharacters(ctx context.Context, request api.PutCharactersRequestObject) (api.PutCharactersResponseObject, error) {

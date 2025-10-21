@@ -1,8 +1,6 @@
 package character_repository
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"movies/internal/db"
@@ -20,15 +18,9 @@ func New(db *db.MemoryDb) *CharacterRepository {
 	return &CharacterRepository{DB: db}
 }
 
-func (mr *CharacterRepository) Create(name string, movie movie.Movie, cert *x509.Certificate, privateKey *rsa.PrivateKey) character.Character {
-	character := character.NewWithOptions(
-		character.WithName(name),
-		character.WithMovie(movie),
-		character.WithCert(cert, privateKey),
-	)
-
-	mr.DB.Characters.Store(character.Id, *character)
-	return *character
+func (mr *CharacterRepository) Create(character character.Character) character.Character {
+	mr.DB.Characters.Store(character.Id, character)
+	return character
 }
 
 func (mr *CharacterRepository) Get(id uuid.UUID) character.Character {

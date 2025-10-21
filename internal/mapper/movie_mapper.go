@@ -1,8 +1,10 @@
 package mapper
 
 import (
-	"movies/internal/entity/movie"
+	"crypto/rsa"
+	"crypto/x509"
 	"movies/internal/api"
+	"movies/internal/entity/movie"
 )
 
 func MapMovieEntityToPostDto(movie movie.Movie) api.PostMovies201JSONResponse {
@@ -40,3 +42,12 @@ func MapMovieDtoToEntity(movieDto api.Movie) movie.Movie {
 		Year:  movieDto.Year,
 	}
 }
+
+func MapMoviePostRequestBodyToEntity(movieDto *api.PostMoviesJSONRequestBody, cert *x509.Certificate, privateKey *rsa.PrivateKey) movie.Movie {
+	return *movie.NewWithOptions(
+		movie.WithTitle(movieDto.Title),
+		movie.WithYear(movieDto.Year),
+		movie.WithCert(cert, privateKey),
+	)
+}
+

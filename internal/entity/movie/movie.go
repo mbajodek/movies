@@ -69,9 +69,11 @@ func (m Movie) GetPrivateKey() *rsa.PrivateKey {
 }
 
 func certToPEMString(cert *x509.Certificate) string {
-    pemBytes := pem.EncodeToMemory(&pem.Block{
-        Type:  "CERTIFICATE",
-        Bytes: cert.Raw,
-    })
+    pemBytes := pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "CERTIFICATE",
+			Bytes: cert.Raw,
+		},
+	)
     return string(pemBytes)
 }
